@@ -24,3 +24,44 @@ val negFourAST = parse("-4")
 // which calls the parser and then delegates to your eval function.
 //eval("undefined + 1")
 
+
+def toNumber2(v: Expr): Double = {
+  require(isValue(v))
+  (v: @unchecked) match {
+    case N(n) => n
+    case B(b) => if (b) 1 else 0
+    case S(str) => try
+      {
+        str.toDouble
+      } catch {
+      case e: Exception => Double.NaN
+      }
+    case _ => Double.NaN
+  }
+}
+
+//val tmp0= toNumber("10")
+val tmp1=B(true)
+toNumber2(v = tmp1)
+//val tmp2=Var("2")
+//toNumber(tmp2)
+
+val test="2"
+val test2 = S("2")
+toNumber2(test2)
+val e = Undefined
+toNumber2(e)
+
+val word="True"
+word.toLowerCase
+
+
+val empty1=""
+val empty2=" "
+
+empty1.isEmpty
+val inf_lower="infinity"
+val inf_upper="Infinity"
+toNumber2(S(inf_lower))
+toNumber2(S(inf_upper))
+
