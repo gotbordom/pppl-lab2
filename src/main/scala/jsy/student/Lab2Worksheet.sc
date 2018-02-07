@@ -65,3 +65,16 @@ val inf_upper="Infinity"
 toNumber2(S(inf_lower))
 toNumber2(S(inf_upper))
 
+val dict: Env = Map()
+
+val e1 = N(3)
+val e2 = Binary(Plus, Var("x"), N(1))
+val e3 = eval(ConstDecl("x", e1, e2))
+
+val e4 = extend(Map(),"x",e1)
+
+
+
+//val e5 = eval(e4,eval(e2))
+//e3 === N(4))
+

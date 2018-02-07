@@ -98,9 +98,12 @@ object Lab2 extends jsy.util.JsyApplication with Lab2Like {
       case N(n) => N(n)
       case B(b) => B(b)
       case S(s) => S(s)
+      case Var(x) => try lookup(env,x) catch {case _ : Throwable => Undefined}
       case Undefined => Undefined
       /* Inductive Cases */
       case Print(e1) => println(pretty(eval(env, e1))); Undefined
+      case ConstDecl(s,e1,e2) => eval(extend(env,s,eval(env,e1)),e2)
+      case If(e1,e2,e3) => ???
 
       // Looking at all Binary cases:
       case Binary(bop,e1,e2) =>
@@ -135,27 +138,32 @@ object Lab2 extends jsy.util.JsyApplication with Lab2Like {
               // Aside from the previous comment about this section, it all works the same as mult and sub.
               case (S(s),_) => N(toNumber(eval(env,S(s))) / toNumber(eval(env,e2)))
               case (_,S(s)) => N(toNumber(eval(env,e1)) / toNumber(eval(env,S(s))))
-              case (_,_) => N(toNumber(eval(e1))/toNumber(eval(env,e2)))
+              case (_,_) => N(toNumber(eval(env,e1))/toNumber(eval(env,e2)))
             }
           // Note about this... the notes say to use === not ==, which are very different in both scala and Javascript's node js
-          case Eq => ???
-          case Ne => ???
-          case Lt => ???
-          case Le => ???
-          case Gt => ???
-          case Ge => ???
+          case Eq => B(toNumber(eval(env,e1)) == toNumber(eval(env,e2)))    // THere will be an error here if I get two words that are different ...
+          case Ne => B(toNumber(eval(env,e1)) != toNumber(eval(env,e2)))
+          case Lt => B(toNumber(eval(env,e1)) < toNumber(eval(env,e2)))
+          case Le => B(toNumber(eval(env,e1)) <= toNumber(eval(env,e2)))
+          case Gt => B(toNumber(eval(env,e1)) > toNumber(eval(env,e2)))
+          case Ge => B(toNumber(eval(env,e1)) >= toNumber(eval(env,e2)))
           // This is a really weird opperator in javascript...
-          case And =>
-            // Looking first if one of the two values is a string:
-            (e1,e2) match {
-              case _ => ???
-            }
-          case Or => ???
-          case Seq => ???
+          case And => if (toBoolean(eval(env,e1))) eval(env,e2) else eval(env,e1)
+          case Or => if (!toBoolean(eval(env,e1))) eval(env,e2) else eval(env,e1)
+          case Seq => eval(env,e1); eval(env,e2)
           case _ => ???
 
         }
+      // Unary operations:
+      case Unary(uop,e1) =>
+        uop match {
+          case Neg => N(-1*toNumber(eval(env,e1)))
+          case Not => B(!toBoolean(eval(env,e1)))
+        }
       case _ => ???
+        // ConstDecal => eval(extend(env,e1),e2)
+        // console.log(3) = 3 \n Undefined
+        // console.log(3) + console.log(4) = 3 \n 4 \n NaN
     }
   }
 
