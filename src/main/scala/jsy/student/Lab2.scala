@@ -63,12 +63,7 @@ object Lab2 extends jsy.util.JsyApplication with Lab2Like {
     (v: @unchecked) match {
       case N(n) => n
       case B(b) => if (b) 1 else 0
-      case S(str) => try
-      {
-        str.toDouble
-      } catch {
-        case e: Exception => Double.NaN
-      }
+      case S(str) => try str.toDouble catch {case _ : Throwable => Double.NaN}
       case _ => Double.NaN
     }
   }
@@ -103,7 +98,7 @@ object Lab2 extends jsy.util.JsyApplication with Lab2Like {
       /* Inductive Cases */
       case Print(e1) => println(pretty(eval(env, e1))); Undefined
       case ConstDecl(s,e1,e2) => eval(extend(env,s,eval(env,e1)),e2)
-      case If(e1,e2,e3) => ???
+      case If(e1,e2,e3) => if(toBoolean(eval(env,e1))) eval(env,e2) else eval(env,e3)
 
       // Looking at all Binary cases:
       case Binary(bop,e1,e2) =>
@@ -116,21 +111,21 @@ object Lab2 extends jsy.util.JsyApplication with Lab2Like {
               case (S(s),_) => S(s+toStr(eval(env,e2)))
               case (_,S(s)) => S(toStr(eval(env,e1))+s)
               // Any boolean plus number is a number:
-              case (_,_) => N(toNumber(eval(e1))+toNumber(eval(env,e2)))
+              case (_,_) => N(toNumber(eval(env,e1))+toNumber(eval(env,e2)))
             }
           case Minus =>
             (e1,e2) match {
                // Strings act like standerd subtraction <- though the NaNs are a pain due to words...
               case (S(s),_) => N(toNumber(eval(env,S(s))) - toNumber(eval(env,e2)))
               case (_,S(s)) => N(toNumber(eval(env,e1)) - toNumber(eval(env,S(s))))
-              case (_,_) => N(toNumber(eval(e1))-toNumber(eval(env,e2)))
+              case (_,_) => N(toNumber(eval(env,e1))-toNumber(eval(env,e2)))
             }
           case Times =>
             (e1,e2) match {
               // Strings act the same as they would in minus... a number acts like a number and a word becomes NaN
               case (S(s),_) => N(toNumber(eval(env,S(s))) * toNumber(eval(env,e2)))
               case (_,S(s)) => N(toNumber(eval(env,e1)) * toNumber(eval(env,S(s))))
-              case (_,_) => N(toNumber(eval(e1))*toNumber(eval(env,e2)))
+              case (_,_) => N(toNumber(eval(env,e1))*toNumber(eval(env,e2)))
             }
           case Div =>
             // This has a weird case "Infinity" or 0... Which scala seems to have a double = Infinity so it seems fine
@@ -151,8 +146,7 @@ object Lab2 extends jsy.util.JsyApplication with Lab2Like {
           case And => if (toBoolean(eval(env,e1))) eval(env,e2) else eval(env,e1)
           case Or => if (!toBoolean(eval(env,e1))) eval(env,e2) else eval(env,e1)
           case Seq => eval(env,e1); eval(env,e2)
-          case _ => ???
-
+          //case _ => Undefined
         }
       // Unary operations:
       case Unary(uop,e1) =>
@@ -160,10 +154,7 @@ object Lab2 extends jsy.util.JsyApplication with Lab2Like {
           case Neg => N(-1*toNumber(eval(env,e1)))
           case Not => B(!toBoolean(eval(env,e1)))
         }
-      case _ => ???
-        // ConstDecal => eval(extend(env,e1),e2)
-        // console.log(3) = 3 \n Undefined
-        // console.log(3) + console.log(4) = 3 \n 4 \n NaN
+      case _ => Undefined
     }
   }
 

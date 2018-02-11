@@ -78,3 +78,5 @@ val e4 = extend(Map(),"x",e1)
 //val e5 = eval(e4,eval(e2))
 //e3 === N(4))
 
+val f1 = parse("-1/0")
+val f2 = eval(f1)
